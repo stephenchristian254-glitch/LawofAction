@@ -25,7 +25,6 @@
             font-family: 'Inter', -apple-system, sans-serif;
             background-color: var(--background);
             color: var(--text-color);
-            /* KUNCI: Mencegah 'body' scroll, kita akan buat container scroll sendiri */
             overflow: hidden;
             height: 100vh;
         }
@@ -45,7 +44,7 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 70px; /* Lebar 'tulang punggung' buku */
+            width: 70px;
             height: 100vh;
             background: var(--dark-grey);
             border-right: 1px solid #333;
@@ -58,19 +57,18 @@
 
         #action-bar-progress {
             width: 4px;
-            height: 100%; /* Dibuat 100% agar 'track' terlihat */
+            height: 100%;
             background: #222;
             position: relative;
             overflow: hidden;
         }
 
-        /* Ini adalah bar yang akan terisi saat scroll */
         #progress-indicator {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 0%; /* Dimulai dari 0, diisi oleh JS */
+            height: 0%;
             background: var(--dark-blue);
             transition: height 0.1s linear;
         }
@@ -91,10 +89,8 @@
         #content-container {
             width: 100%;
             height: 100vh;
-            /* KUNCI: Ini adalah SATU-SATUNYA elemen yang scroll */
             overflow-y: scroll;
             overflow-x: hidden;
-            /* Memberi ruang untuk Action Bar */
             padding-left: 70px;
             scroll-behavior: smooth;
         }
@@ -104,7 +100,7 @@
         ================================= */
         section {
             width: 100%;
-            min-height: 100vh; /* Setiap bagian minimal seukuran layar */
+            min-height: 100vh;
             padding: 60px 5%;
             border-bottom: 1px solid #222;
         }
@@ -126,8 +122,8 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            padding: 0; /* Hapus padding agar video penuh */
-            margin-left: -70px; /* Menutupi Action Bar di awal */
+            padding: 0;
+            margin-left: -70px;
         }
         
         #hero-video-container {
@@ -142,7 +138,7 @@
             filter: grayscale(80%) brightness(0.5) contrast(1.2);
         }
 
-        #hero::before { /* Overlay gelap */
+        #hero::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -185,16 +181,15 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 5%;
-            padding-top: 10vh; /* Beri ruang di atas */
+            padding-top: 10vh;
             padding-bottom: 10vh;
-            min-height: 200vh; /* Dibuat SANGAT TINGGI agar efek scroll-nya terasa */
+            min-height: 200vh;
         }
 
-        /* KUNCI: Teks pendek yang 'menempel' */
         .sticky-punchline {
             position: sticky;
             top: 0;
-            height: 100vh; /* Menempel di tengah layar */
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -205,10 +200,8 @@
             line-height: 1.3;
         }
         
-        /* KUNCI: Teks panjang yang 'scroll' */
         .scrolling-text {
-            /* Tidak perlu CSS khusus, biarkan mengalir alami */
-            padding-top: 25vh; /* Mulai scroll di tengah */
+            padding-top: 25vh;
         }
         
         .scrolling-text img {
@@ -219,7 +212,6 @@
             filter: grayscale(80%) brightness(0.8);
         }
 
-        /* Layout terbalik untuk variasi */
         .layout-reverse {
             grid-template-areas: "scrolling sticky";
         }
@@ -288,10 +280,9 @@
            9. IDE BARU #3: PARALLAX TRANSITION
         ================================= */
         .parallax-transition {
-            min-height: 60vh; /* Tidak perlu setinggi layar */
+            min-height: 60vh;
             background-size: cover;
             background-position: center;
-            /* KUNCI: Efek parallax CSS sederhana */
             background-attachment: fixed; 
             display: flex;
             justify-content: center;
@@ -325,7 +316,6 @@
             margin-bottom: 20px;
         }
 
-        /* -- Timer Module -- */
         #timer-display {
             font-size: 4rem;
             font-weight: 900;
@@ -348,7 +338,6 @@
         .action-button:hover { transform: scale(1.05); }
         .action-button:disabled { background: #555; cursor: not-allowed; }
         
-        /* -- Burner Module -- */
         #fear-input {
             width: 100%;
             background: #222;
@@ -360,7 +349,6 @@
             margin-bottom: 20px;
         }
         
-        /* Efek 'terbakar' */
         #fear-input.burning {
             animation: burn 1s forwards;
         }
@@ -383,7 +371,6 @@
             margin-bottom: 40px;
         }
         
-        /* Form untuk submit */
         #action-form {
             display: flex;
             gap: 10px;
@@ -400,10 +387,8 @@
             border-radius: 8px;
         }
         
-        /* Grid untuk 'dinding' */
         #wall-grid {
             display: grid;
-            /* KUNCI: Grid responsif yang otomatis mengisi */
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 15px;
             max-width: 1200px;
@@ -419,7 +404,6 @@
         }
         
         .wall-item.new-item {
-             /* Animasi untuk item baru */
              animation: pop-in 0.5s ease;
         }
         
@@ -440,28 +424,26 @@
         }
 
         /* =================================
-           12. RESPONSIVE DESIGN (PENTING)
+           12. RESPONSIVE DESIGN (PERBAIKAN FONT HP)
         ================================= */
         @media (max-width: 768px) {
-            /* Sembunyikan 'tulang punggung' di HP, terlalu makan tempat */
             #action-bar-spine {
                 display: none;
             }
             #content-container {
-                padding-left: 0; /* Reset padding */
+                padding-left: 0;
             }
             #hero {
-                margin-left: 0; /* Reset margin */
+                margin-left: 0;
             }
             #hero h1 { font-size: 2.5rem; }
 
-            /* Ubah layout 'Sticky' menjadi tumpukan di HP */
             .sticky-chapter {
                 grid-template-columns: 1fr;
                 min-height: auto;
             }
             .sticky-punchline {
-                position: relative; /* Matikan 'sticky' */
+                position: relative;
                 height: auto;
                 min-height: 50vh;
             }
@@ -471,6 +453,26 @@
             .layout-reverse {
                 grid-template-areas: unset;
             }
+            
+            /* --- [KODE PERBAIKAN DI SINI] --- */
+            /* Ini akan memperbaiki font yang tumpang tindih di HP */
+            .sticky-punchline h2 {
+                font-size: 2.5rem; /* Mengecilkan font 'Bab II' */
+                text-align: center;
+            }
+            #timer-display {
+                font-size: 3rem; /* Mengecilkan font '05:00' */
+            }
+            .action-module h3 {
+                font-size: 1.5rem; /* Mengecilkan font 'Hancurkan Kelambanan' */
+            }
+            #interactive-slider-section h2 {
+                font-size: 1.5rem; /* Mengecilkan judul slider */
+            }
+            .parallax-transition h3 {
+                font-size: 1.8rem; /* Mengecilkan teks parallax */
+            }
+            /* --- [AKHIR KODE PERBAIKAN] --- */
         }
 
     </style>
@@ -489,7 +491,7 @@
         <section id="hero">
             <div id="hero-video-container">
                 <video autoplay loop muted playsinline id="hero-video">
-                    <source src="images/hero-video.mp4" type="video/mp4">
+                    <source src="hero-video.mp4" type="video/mp4">
                 </video>
             </div>
             <h1>Sukses tidak datang dari apa yang kamu pikirkan. Tapi dari <span class="highlight">APA YANG KAU LAKUKAN.</span></h1>
@@ -499,7 +501,7 @@
             <div class="intro-content">
                 <h2>Selamat Datang di "Buku" Aksi</h2>
                 <p>Ini bukan halaman motivasi biasa. Ini adalah perjalanan. Sebuah 'deep scroll' ke dalam satu-satunya hukum yang benar-benar penting. Lupakan 'Law of Attraction'. Lupakan harapan pasif. Di sini, kita hanya percaya pada satu hal: <span class="highlight">Tindakan Nyata.</span></p>
-                <p>Teruslah scroll. Setiap bab dirancang untuk mengubah cara_pandang Anda. Dan yang lebih penting, mengubah apa yang Anda lakukan *setelah* menutup browser ini.</p>
+                <p>Teruslah scroll. Setiap bab dirancang untuk mengubah cara pandang Anda. Dan yang lebih penting, mengubah apa yang Anda lakukan *setelah* menutup browser ini.</p>
             </div>
         </section>
 
@@ -513,7 +515,7 @@
                 <p>Setiap hari, jutaan ide brilian lahir. Dan setiap hari, jutaan ide brilian mati. Mereka mati dalam diam, di dalam kepala orang-orang yang "menunggu waktu tepat", "menunggu modal", atau "menunggu inspirasi".</p>
                 <p>Sebuah ide, tidak peduli seberapa revolusionernya, memiliki nilai $0 jika hanya tersimpan di otak Anda. Yang membedakan seorang pemimpi dari seorang pencipta adalah satu kata sederhana: **Eksekusi**.</p>
                 
-                <img src="images/bab1-ide.jpg" alt="Ide Terkubur">
+                <img src="bab1-ide.jpg" alt="Ide Terkubur">
                 
                 <h3>Kutukan "Nanti"</h3>
                 <p>Nanti adalah tempat di mana impian dikuburkan. "Nanti" adalah alasan paling nyaman untuk tetap berada di zona nyaman. Musuh Anda bukanlah kegagalan. Musuh Anda adalah sikap "nanti".</p>
@@ -524,17 +526,17 @@
         <section id="interactive-slider-section">
              <h2>Buktikan Sendiri. <span class="highlight">Geser Bar</span> untuk Mengubah Ide Menjadi Aksi.</h2>
              <div class="comparison-slider">
-                <img src="images/slider-sebelum.jpg" alt="Ide" class="image-before">
+                <img src="slider-sebelum.jpg" alt="Ide" class="image-before">
                 
                 <div class="image-after-wrapper" id="after-wrapper">
-                    <img src="images/slider-sesudah.jpg" alt="Aksi" class="image-after">
+                    <img src="slider-sesudah.jpg" alt="Aksi" class="image-after">
                 </div>
 
                 <input type="range" min="0" max="100" value="50" class="slider-bar" id="action-slider" aria-label="Geser untuk melihat aksi">
             </div>
         </section>
 
-        <section class="parallax-transition" style="background-image: url('images/parallax-gunung.jpg');">
+        <section class="parallax-transition" style="background-image: url('parallax-gunung.jpg');">
             <h3>Perjalanan Telah Dimulai.</h3>
         </section>
 
@@ -548,7 +550,7 @@
                 <p>Kita sering salah mengira kelambanan (procrastination) sebagai kemalasan. Ini salah besar. Kelambanan bukanlah masalah manajemen waktu, ini masalah manajemen emosi. Kita menunda bukan karena kita malas, tapi karena kita <span class="highlight">takut</span>.</p>
                 <p>Takut gagal. Takut dihakimi. Takut tidak sempurna. Takut sukses. Rasa takut ini melumpuhkan. Ia berbisik, "Jangan lakukan. Lebih aman diam." Dan Hukum Tindakan adalah satu-satunya cara untuk membungkam bisikan itu.</p>
 
-                <img src="images/bab2-takut.jpg" alt="Rasa Takut Melumpuhkan">
+                <img src="bab2-takut.jpg" alt="Rasa Takut Melumpuhkan">
 
                 <div class="action-module">
                     <h3>Hancurkan Kelambanan. <br>Sekarang.</h3>
@@ -570,7 +572,7 @@
             </div>
         </section>
         
-        <section class="parallax-transition" style="background-image: url('images/parallax-elang.jpg');">
+        <section class="parallax-transition" style="background-image: url('parallax-elang.jpg');">
             <h3>Anda Telah Bertindak.</h3>
         </section>
 
