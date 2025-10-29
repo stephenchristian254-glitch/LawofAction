@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Action Book: A Deep Scroll Experience</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        :root {
+            --dark-blue: #00008B;
+            --background: #000000;
+            --text-color: #FFFFFF;
+            --grey-text: #AAAAAA;
+            --dark-grey: #111111;
+        }
+
+        /* =================================
+           1. PENGATURAN DASAR & "BUKU"
+        ================================= */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--background);
+            color: var(--text-color);
+            /* KUNCI: Mencegah 'body' scroll, kita akan buat container scroll sendiri */
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        h1, h2, h3 { font-weight: 900; }
+        p { 
+            font-size: 1.1rem; 
+            line-height: 1.7; 
+            color: var(--grey-text);
+            margin-bottom: 1.5rem;
+        }
+
+        /* =================================
+           2. IDE BARU #1: THE ACTION BAR (Progress Spine)
+        ================================= */
+        #action-bar-spine {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 70px; /* Lebar 'tulang punggung' buku */
+            height: 100vh;
+            background: var(--dark-grey);
+            border-right: 1px solid #333;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        #action-bar-progress {
+            width: 4px;
+            height: 100%; /* Dibuat 100% agar 'track' terlihat */
+            background: #222;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Ini adalah bar yang akan terisi saat scroll */
+        #progress-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0%; /* Dimulai dari 0, diisi oleh JS */
+            background: var(--dark-blue);
+            transition: height 0.1s linear;
+        }
+
+        #action-bar-spine span {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            margin-top: 20px;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--grey-text);
+        }
+
+        /* =================================
+           3. CONTAINER SCROLL UTAMA
+        ================================= */
+        #content-container {
+            width: 100%;
+            height: 100vh;
+            /* KUNCI: Ini adalah SATU-SATUNYA elemen yang scroll */
+            overflow-y: scroll;
+            overflow-x: hidden;
+            /* Memberi ruang untuk Action Bar */
+            padding-left: 70px;
+            scroll-behavior: smooth;
+        }
+
+        /* =================================
+           4. SEMUA SECTION / HALAMAN
+        ================================= */
+        section {
+            width: 100%;
+            min-height: 100vh; /* Setiap bagian minimal seukuran layar */
+            padding: 60px 5%;
+            border-bottom: 1px solid #222;
+        }
+        
+        .highlight {
+            background-color: var(--dark-blue);
+            color: var(--text-color);
+            padding: 4px 10px;
+            border-radius: 6px;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+        }
+
+        /* =================================
+           5. SECTION: HERO VIDEO (Hook Anda)
+        ================================= */
+        #hero {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 0; /* Hapus padding agar video penuh */
+            margin-left: -70px; /* Menutupi Action Bar di awal */
+        }
+        
+        #hero-video-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: 1;
+        }
+        
+        #hero-video {
+            min-width: 100%; min-height: 100%;
+            object-fit: cover;
+            filter: grayscale(80%) brightness(0.5) contrast(1.2);
+        }
+
+        #hero::before { /* Overlay gelap */
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 2;
+        }
+        
+        #hero h1 {
+            position: relative;
+            z-index: 3;
+            font-size: 4rem;
+            max-width: 900px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        /* =================================
+           6. SECTION: INTRO (Teks Panjang)
+        ================================= */
+        #intro {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .intro-content {
+            max-width: 800px;
+            text-align: center;
+        }
+        
+        #intro h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        /* =================================
+           7. IDE BARU #2: STICKY MANIFESTO
+        ================================= */
+        .sticky-chapter {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5%;
+            padding-top: 10vh; /* Beri ruang di atas */
+            padding-bottom: 10vh;
+            min-height: 200vh; /* Dibuat SANGAT TINGGI agar efek scroll-nya terasa */
+        }
+
+        /* KUNCI: Teks pendek yang 'menempel' */
+        .sticky-punchline {
+            position: sticky;
+            top: 0;
+            height: 100vh; /* Menempel di tengah layar */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .sticky-punchline h2 {
+            font-size: 3.5rem;
+            line-height: 1.3;
+        }
+        
+        /* KUNCI: Teks panjang yang 'scroll' */
+        .scrolling-text {
+            /* Tidak perlu CSS khusus, biarkan mengalir alami */
+            padding-top: 25vh; /* Mulai scroll di tengah */
+        }
+        
+        .scrolling-text img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 2rem 0;
+            filter: grayscale(80%) brightness(0.8);
+        }
+
+        /* Layout terbalik untuk variasi */
+        .layout-reverse {
+            grid-template-areas: "scrolling sticky";
+        }
+        .layout-reverse .sticky-punchline { grid-area: sticky; }
+        .layout-reverse .scrolling-text { grid-area: scrolling; }
+
+        /* =================================
+           8. SECTION: ACTION SLIDER (Ide Anda)
+        ================================= */
+        #interactive-slider-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: var(--dark-grey);
+        }
+        
+        #interactive-slider-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+            max-width: 700px;
+        }
+        
+        .comparison-slider {
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 16 / 9;
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 2px solid var(--dark-blue);
+        }
+        
+        .comparison-slider img {
+            width: 100%; height: 100%; object-fit: cover;
+            position: absolute; top: 0; left: 0;
+        }
+        .image-before {
+            z-index: 1; filter: grayscale(100%) brightness(0.8);
+        }
+        .image-after-wrapper {
+            position: absolute; top: 0; left: 0;
+            width: 50%; height: 100%;
+            z-index: 2; overflow: hidden;
+            border-right: 4px solid var(--text-color);
+        }
+        .image-after {
+            z-index: 3;
+            filter: sepia(80%) saturate(300%) hue-rotate(-50deg) brightness(1.1);
+        }
+        .slider-bar {
+            -webkit-appearance: none; appearance: none;
+            width: 100%; height: 100%;
+            background: transparent;
+            position: absolute; top: 0; left: 0;
+            z-index: 10; cursor: ew-resize;
+        }
+        .slider-bar::-webkit-slider-thumb {
+             -webkit-appearance: none; appearance: none;
+             width: 4px; height: 100vh;
+             background: transparent; cursor: ew-resize;
+        }
+
+        /* =================================
+           9. IDE BARU #3: PARALLAX TRANSITION
+        ================================= */
+        .parallax-transition {
+            min-height: 60vh; /* Tidak perlu setinggi layar */
+            background-size: cover;
+            background-position: center;
+            /* KUNCI: Efek parallax CSS sederhana */
+            background-attachment: fixed; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        
+        .parallax-transition h3 {
+            font-size: 2.5rem;
+            color: white;
+            padding: 10px 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+            text-shadow: 0 2px 4px black;
+        }
+
+        /* =================================
+           10. IDE BARU #4: ACTION MODULES
+        ================================= */
+        .action-module {
+            background: var(--dark-grey);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 3rem 0;
+        }
+        
+        .action-module h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        /* -- Timer Module -- */
+        #timer-display {
+            font-size: 4rem;
+            font-weight: 900;
+            color: var(--dark-blue);
+            margin: 20px 0;
+        }
+        
+        .action-button {
+            background-color: var(--dark-blue);
+            color: var(--text-color);
+            border: none;
+            padding: 15px 35px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .action-button:hover { transform: scale(1.05); }
+        .action-button:disabled { background: #555; cursor: not-allowed; }
+        
+        /* -- Burner Module -- */
+        #fear-input {
+            width: 100%;
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            font-size: 1.1rem;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        /* Efek 'terbakar' */
+        #fear-input.burning {
+            animation: burn 1s forwards;
+        }
+        @keyframes burn {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.05); filter: blur(2px); }
+            100% { opacity: 0; transform: scale(0.8); filter: blur(5px); }
+        }
+        
+        /* =================================
+           11. IDE BARU #5: THE WALL OF ACTION
+        ================================= */
+        #wall-of-action {
+            background: var(--background);
+        }
+
+        #wall-of-action h2 {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        /* Form untuk submit */
+        #action-form {
+            display: flex;
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+        }
+        #action-text-input {
+            flex-grow: 1;
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            font-size: 1rem;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        /* Grid untuk 'dinding' */
+        #wall-grid {
+            display: grid;
+            /* KUNCI: Grid responsif yang otomatis mengisi */
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .wall-item {
+            background: var(--dark-grey);
+            border: 1px solid #222;
+            padding: 20px;
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .wall-item.new-item {
+             /* Animasi untuk item baru */
+             animation: pop-in 0.5s ease;
+        }
+        
+        .wall-item p {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: white;
+        }
+        .wall-item span {
+            font-size: 0.8rem;
+            color: var(--dark-blue);
+            font-weight: bold;
+        }
+
+        @keyframes pop-in {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* =================================
+           12. RESPONSIVE DESIGN (PENTING)
+        ================================= */
+        @media (max-width: 768px) {
+            /* Sembunyikan 'tulang punggung' di HP, terlalu makan tempat */
+            #action-bar-spine {
+                display: none;
+            }
+            #content-container {
+                padding-left: 0; /* Reset padding */
+            }
+            #hero {
+                margin-left: 0; /* Reset margin */
+            }
+            #hero h1 { font-size: 2.5rem; }
+
+            /* Ubah layout 'Sticky' menjadi tumpukan di HP */
+            .sticky-chapter {
+                grid-template-columns: 1fr;
+                min-height: auto;
+            }
+            .sticky-punchline {
+                position: relative; /* Matikan 'sticky' */
+                height: auto;
+                min-height: 50vh;
+            }
+            .scrolling-text {
+                padding-top: 0;
+            }
+            .layout-reverse {
+                grid-template-areas: unset;
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <nav id="action-bar-spine">
+        <span>The Law of Action</span>
+        <div id="action-bar-progress">
+            <div id="progress-indicator"></div>
+        </div>
+    </nav>
+
+    <main id="content-container">
+
+        <section id="hero">
+            <div id="hero-video-container">
+                <video autoplay loop muted playsinline id="hero-video">
+                    <source src="images/hero-video.mp4" type="video/mp4">
+                </video>
+            </div>
+            <h1>Sukses tidak datang dari apa yang kamu pikirkan. Tapi dari <span class="highlight">APA YANG KAU LAKUKAN.</span></h1>
+        </section>
+
+        <section id="intro">
+            <div class="intro-content">
+                <h2>Selamat Datang di "Buku" Aksi</h2>
+                <p>Ini bukan halaman motivasi biasa. Ini adalah perjalanan. Sebuah 'deep scroll' ke dalam satu-satunya hukum yang benar-benar penting. Lupakan 'Law of Attraction'. Lupakan harapan pasif. Di sini, kita hanya percaya pada satu hal: <span class="highlight">Tindakan Nyata.</span></p>
+                <p>Teruslah scroll. Setiap bab dirancang untuk mengubah cara_pandang Anda. Dan yang lebih penting, mengubah apa yang Anda lakukan *setelah* menutup browser ini.</p>
+            </div>
+        </section>
+
+        <section id="chapter1" class="sticky-chapter">
+            <div class="sticky-punchline">
+                <h2>Bab I: <br>Mitos <span class="highlight">Ide Brilian</span></h2>
+            </div>
+            
+            <div class="scrolling-text">
+                <h3>Ide Tidak Ada Harganya</h3>
+                <p>Setiap hari, jutaan ide brilian lahir. Dan setiap hari, jutaan ide brilian mati. Mereka mati dalam diam, di dalam kepala orang-orang yang "menunggu waktu tepat", "menunggu modal", atau "menunggu inspirasi".</p>
+                <p>Sebuah ide, tidak peduli seberapa revolusionernya, memiliki nilai $0 jika hanya tersimpan di otak Anda. Yang membedakan seorang pemimpi dari seorang pencipta adalah satu kata sederhana: **Eksekusi**.</p>
+                
+                <img src="images/bab1-ide.jpg" alt="Ide Terkubur">
+                
+                <h3>Kutukan "Nanti"</h3>
+                <p>Nanti adalah tempat di mana impian dikuburkan. "Nanti" adalah alasan paling nyaman untuk tetap berada di zona nyaman. Musuh Anda bukanlah kegagalan. Musuh Anda adalah sikap "nanti".</p>
+                <p>Hukum Tindakan menuntut Anda untuk menghargai "sekarang". Satu langkah kecil yang dilakukan hari ini seribu kali lebih berharga daripada rencana besar yang akan dilakukan "nanti".</p>
+            </div>
+        </section>
+        
+        <section id="interactive-slider-section">
+             <h2>Buktikan Sendiri. <span class="highlight">Geser Bar</span> untuk Mengubah Ide Menjadi Aksi.</h2>
+             <div class="comparison-slider">
+                <img src="images/slider-sebelum.jpg" alt="Ide" class="image-before">
+                
+                <div class="image-after-wrapper" id="after-wrapper">
+                    <img src="images/slider-sesudah.jpg" alt="Aksi" class="image-after">
+                </div>
+
+                <input type="range" min="0" max="100" value="50" class="slider-bar" id="action-slider" aria-label="Geser untuk melihat aksi">
+            </div>
+        </section>
+
+        <section class="parallax-transition" style="background-image: url('images/parallax-gunung.jpg');">
+            <h3>Perjalanan Telah Dimulai.</h3>
+        </section>
+
+        <section id="chapter2" class="sticky-chapter layout-reverse">
+            <div class="sticky-punchline">
+                <h2>Bab II: <br>Musuh Sebenarnya, <span class="highlight">Kelambanan</span></h2>
+            </div>
+            
+            <div class="scrolling-text">
+                <h3>Ini Bukan Malas, Ini Takut</h3>
+                <p>Kita sering salah mengira kelambanan (procrastination) sebagai kemalasan. Ini salah besar. Kelambanan bukanlah masalah manajemen waktu, ini masalah manajemen emosi. Kita menunda bukan karena kita malas, tapi karena kita <span class="highlight">takut</span>.</p>
+                <p>Takut gagal. Takut dihakimi. Takut tidak sempurna. Takut sukses. Rasa takut ini melumpuhkan. Ia berbisik, "Jangan lakukan. Lebih aman diam." Dan Hukum Tindakan adalah satu-satunya cara untuk membungkam bisikan itu.</p>
+
+                <img src="images/bab2-takut.jpg" alt="Rasa Takut Melumpuhkan">
+
+                <div class="action-module">
+                    <h3>Hancurkan Kelambanan. <br>Sekarang.</h3>
+                    <p>Jangan hanya membaca. Lakukan. Saya tantang Anda untuk mengambil 5 menit *saat ini juga* untuk melakukan 1 hal yang Anda tunda.</p>
+                    <div id="timer-display">05:00</div>
+                    <button class="action-button" id="start-timer-btn">Mulai Timer 5 Menit</button>
+                    <p id="timer-done" style="display:none; color: var(--dark-blue); font-weight: bold; margin-top: 15px;">WAKTU HABIS. Selamat, Anda telah bertindak!</p>
+                </div>
+                
+                <h3>Membakar Keraguan</h3>
+                <p>Rasa takut itu seperti bayangan. Ia terlihat besar dan menakutkan, tapi tidak nyata. Ia tidak bisa disentuh. Dan cara terbaik menghilangkannya adalah dengan menyalakan cahaya. **Tindakan adalah cahaya itu.**</button>
+                
+                <div class="action-module">
+                    <h3>Visualisasikan & Hancurkan</h3>
+                    <p>Tulis satu ketakutan atau keraguan terbesar Anda di bawah ini. Lalu, bakar.</p>
+                    <input type="text" id="fear-input" placeholder="Contoh: 'Takut di-judge orang saat mulai...' ">
+                    <button class="action-button" id="burn-fear-btn">Bakar Keraguan Ini</button>
+                </div>
+            </div>
+        </section>
+        
+        <section class="parallax-transition" style="background-image: url('images/parallax-elang.jpg');">
+            <h3>Anda Telah Bertindak.</h3>
+        </section>
+
+        <section id="wall-of-action">
+            <h2>Anda Tidak Sendirian. <span class="highlight">Ini Dinding Aksi.</span></h2>
+            <p style="text-align: center; max-width: 700px; margin: 0 auto 40px auto;">Lihat tindakan yang telah diambil orang lain hari ini. Tambahkan milik Anda. Jadilah bagian dari gerakan ini.</p>
+            
+            <form id="action-form">
+                <input type="text" id="action-text-input" placeholder="Tindakan pertama saya hari ini adalah..." required>
+                <button type="submit" class="action-button">Submit Aksi</button>
+            </form>
+            
+            <div id="wall-grid">
+                <div class="wall-item">
+                    <p>"Akhirnya mengirim email penting yang sudah saya tunda 3 hari."</p>
+                    <span>- Baru Saja</span>
+                </div>
+                <div class="wall-item">
+                    <p>"Membereskan meja kerja saya. Kecil, tapi langkah awal."</p>
+                    <span>- 5 Menit Lalu</span>
+                </div>
+                <div class="wall-item">
+                    <p>"Menelepon 1 klien potensial."</p>
+                    <span>- 12 Menit Lalu</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Menunggu semua konten HTML dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- [1] FUNGSI UNTUK ACTION BAR (Progress Spine) ---
+            const contentContainer = document.getElementById('content-container');
+            const progressIndicator = document.getElementById('progress-indicator');
+            
+            function updateProgressBar() {
+                const scrollTop = contentContainer.scrollTop;
+                // scrollHeight adalah tinggi total konten, clientHeight adalah tinggi layar
+                const scrollHeight = contentContainer.scrollHeight - contentContainer.clientHeight;
+                
+                if (scrollHeight > 0) {
+                    const progress = (scrollTop / scrollHeight) * 100;
+                    progressIndicator.style.height = progress + '%';
+                }
+            }
+            // Panggil fungsi setiap kali container di-scroll
+            contentContainer.addEventListener('scroll', updateProgressBar);
+
+
+            // --- [2] FUNGSI UNTUK ACTION SLIDER (Tarik Bar) ---
+            const slider = document.getElementById('action-slider');
+            const afterWrapper = document.getElementById('after-wrapper');
+            
+            if(slider && afterWrapper) {
+                slider.addEventListener('input', (e) => {
+                    afterWrapper.style.width = e.target.value + '%';
+                });
+            }
+
+            // --- [3] FUNGSI UNTUK ACTION MODULE (Timer) ---
+            const timerButton = document.getElementById('start-timer-btn');
+            const timerDisplay = document.getElementById('timer-display');
+            const timerDone = document.getElementById('timer-done');
+            let timerInterval;
+            let secondsLeft = 300; // 5 menit
+
+            if (timerButton) {
+                timerButton.addEventListener('click', () => {
+                    // Nonaktifkan tombol
+                    timerButton.disabled = true;
+                    timerButton.textContent = "BERJALAN...";
+
+                    // Mulai interval (berjalan setiap 1 detik)
+                    timerInterval = setInterval(() => {
+                        secondsLeft--;
+
+                        // Format waktu (menit:detik)
+                        let minutes = Math.floor(secondsLeft / 60);
+                        let seconds = secondsLeft % 60;
+                        
+                        // Tambahkan '0' di depan jika < 10
+                        minutes = minutes < 10 ? '0' + minutes : minutes;
+                        seconds = seconds < 10 ? '0' + seconds : seconds;
+
+                        timerDisplay.textContent = `${minutes}:${seconds}`;
+
+                        // Jika waktu habis
+                        if (secondsLeft <= 0) {
+                            clearInterval(timerInterval);
+                            timerDisplay.textContent = "00:00";
+                            timerButton.style.display = 'none';
+                            timerDone.style.display = 'block';
+                        }
+                    }, 1000);
+                });
+            }
+            
+            // --- [4] FUNGSI UNTUK ACTION MODULE (Burner) ---
+            const burnButton = document.getElementById('burn-fear-btn');
+            const fearInput = document.getElementById('fear-input');
+            
+            if (burnButton && fearInput) {
+                burnButton.addEventListener('click', () => {
+                    if (fearInput.value.trim() === '') {
+                        alert('Tulis keraguan Anda terlebih dahulu.');
+                        return;
+                    }
+                    // Tambahkan kelas CSS untuk animasi 'terbakar'
+                    fearInput.classList.add('burning');
+                    burnButton.textContent = "TERBAKAR...";
+                    burnButton.disabled = true;
+
+                    // Reset setelah animasi selesai
+                    setTimeout(() => {
+                        fearInput.value = ''; // Kosongkan input
+                        fearInput.classList.remove('burning'); // Hapus kelas
+                        burnButton.textContent = "Bakar Keraguan Ini";
+                        burnButton.disabled = false;
+                    }, 1000); // 1000ms = 1 detik (sesuai durasi animasi)
+                });
+            }
+
+            // --- [5] FUNGSI UNTUK THE WALL OF ACTION (Submit) ---
+            const actionForm = document.getElementById('action-form');
+            const actionInput = document.getElementById('action-text-input');
+            const wallGrid = document.getElementById('wall-grid');
+
+            if (actionForm) {
+                actionForm.addEventListener('submit', (e) => {
+                    e.preventDefault(); // Mencegah halaman reload
+                    
+                    const actionText = actionInput.value.trim();
+                    if (actionText === '') return;
+
+                    // 1. Buat elemen 'wall-item' baru
+                    const newItem = document.createElement('div');
+                    newItem.classList.add('wall-item', 'new-item'); // 'new-item' untuk animasi
+
+                    // 2. Isi kontennya
+                    const text = document.createElement('p');
+                    text.textContent = `"${actionText}"`;
+                    
+                    const timestamp = document.createElement('span');
+                    timestamp.textContent = '- Baru Saja';
+
+                    newItem.appendChild(text);
+                    newItem.appendChild(timestamp);
+                    
+                    // 3. Tambahkan ke grid (di paling atas)
+                    wallGrid.prepend(newItem);
+                    
+                    // 4. Kosongkan input
+                    actionInput.value = '';
+                });
+            }
+            
+        });
+    </script>
+
+</body>
+</html>
